@@ -2375,7 +2375,7 @@ microblaze*-linux*)
 			tm_defines="${tm_defines} TARGET_BIG_ENDIAN_DEFAULT=4321"
 			;;
 	esac
-	tm_file="${tm_file} gnu-user.h linux.h microblaze/linux.h"
+	tm_file="${tm_file} elfos.h microblaze/elf.h gnu-user.h linux.h microblaze/linux.h"
 	tm_file="${tm_file} glibc-stdint.h"
 	c_target_objs="${c_target_objs} microblaze-c.o"
 	cxx_target_objs="${cxx_target_objs} microblaze-c.o"
@@ -2391,7 +2391,7 @@ microblaze*-*-rtems*)
 			tm_defines="${tm_defines} TARGET_BIG_ENDIAN_DEFAULT=4321"
 			;;
 	esac
-	tm_file="${tm_file}"
+	tm_file="${tm_file} elfos.h microblaze/elf.h"
 	tm_file="${tm_file} microblaze/rtems.h rtems.h newlib-stdint.h"
 	c_target_objs="${c_target_objs} microblaze-c.o"
 	cxx_target_objs="${cxx_target_objs} microblaze-c.o"
@@ -2407,7 +2407,7 @@ microblaze*-*-elf)
 			tm_defines="${tm_defines} TARGET_BIG_ENDIAN_DEFAULT=4321"
 			;;
 	esac
-	tm_file="${tm_file} newlib-stdint.h"
+	tm_file="${tm_file} elfos.h microblaze/elf.h newlib-stdint.h"
 	c_target_objs="${c_target_objs} microblaze-c.o"
 	cxx_target_objs="${cxx_target_objs} microblaze-c.o"
 	tmake_file="${tmake_file} microblaze/t-microblaze"
