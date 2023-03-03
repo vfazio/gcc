@@ -1,5 +1,5 @@
 # GCC target-specific configuration file.
-# Copyright (C) 1997-2021 Free Software Foundation, Inc.
+# Copyright (C) 1997-2023 Free Software Foundation, Inc.
 
 #This file is part of GCC.
 
@@ -2431,7 +2431,7 @@ microblaze*-linux*)
 			tm_defines="${tm_defines} TARGET_BIG_ENDIAN_DEFAULT=4321"
 			;;
 	esac
-	tm_file="${tm_file} dbxelf.h gnu-user.h linux.h microblaze/linux.h"
+	tm_file="${tm_file} elfos.h microblaze/elf.h dbxelf.h gnu-user.h linux.h microblaze/linux.h"
 	tm_file="${tm_file} glibc-stdint.h"
 	c_target_objs="${c_target_objs} microblaze-c.o"
 	cxx_target_objs="${cxx_target_objs} microblaze-c.o"
@@ -2447,7 +2447,7 @@ microblaze*-*-rtems*)
 			tm_defines="${tm_defines} TARGET_BIG_ENDIAN_DEFAULT=4321"
 			;;
 	esac
-	tm_file="${tm_file} dbxelf.h"
+	tm_file="${tm_file} elfos.h microblaze/elf.h dbxelf.h"
 	tm_file="${tm_file} microblaze/rtems.h rtems.h newlib-stdint.h"
 	c_target_objs="${c_target_objs} microblaze-c.o"
 	cxx_target_objs="${cxx_target_objs} microblaze-c.o"
@@ -2463,7 +2463,7 @@ microblaze*-*-elf)
 			tm_defines="${tm_defines} TARGET_BIG_ENDIAN_DEFAULT=4321"
 			;;
 	esac
-	tm_file="${tm_file} dbxelf.h newlib-stdint.h"
+	tm_file="${tm_file} elfos.h microblaze/elf.h dbxelf.h newlib-stdint.h"
 	c_target_objs="${c_target_objs} microblaze-c.o"
 	cxx_target_objs="${cxx_target_objs} microblaze-c.o"
 	tmake_file="${tmake_file} microblaze/t-microblaze"

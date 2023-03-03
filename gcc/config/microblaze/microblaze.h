@@ -1,5 +1,5 @@
 /* Definitions of target machine for GNU compiler for Xilinx MicroBlaze.
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
+   Copyright (C) 2009-2023 Free Software Foundation, Inc.
 
    Contributed by Michael Eager <eager@eagercon.com>.
 
@@ -45,8 +45,6 @@ extern int microblaze_no_unsafe_delay;
 extern int microblaze_has_clz;
 extern enum pipeline_type microblaze_pipe;
 
-#define OBJECT_FORMAT_ELF
-
 #if TARGET_BIG_ENDIAN_DEFAULT
 #define TARGET_ENDIAN_DEFAULT    0
 #define TARGET_ENDIAN_OPTION     "mbig-endian"
@@ -68,8 +66,8 @@ extern enum pipeline_type microblaze_pipe;
 /* The default is to not need GOT for TLS.  */
 #define TLS_NEEDS_GOT 0
 
-/* What is the default setting for -mcpu= . We set it to v4.00.a even though 
-   we are actually ahead. This is safest version that has generate code 
+/* What is the default setting for -mcpu= . We set it to v4.00.a even though
+   we are actually ahead. This is safest version that has generate code
    compatible for the original ISA */
 #define MICROBLAZE_DEFAULT_CPU      "v4.00.a"
 
@@ -142,7 +140,7 @@ extern enum pipeline_type microblaze_pipe;
 #define MB_ABI_SUB_RETURN_ADDR_REGNUM       15
 #define MB_ABI_DEBUG_RETURN_ADDR_REGNUM     16
 #define MB_ABI_EXCEPTION_RETURN_ADDR_REGNUM 17
-#define MB_ABI_ASM_TEMP_REGNUM              18	
+#define MB_ABI_ASM_TEMP_REGNUM              18
 /* This is our temp register.  */
 #define MB_ABI_FRAME_POINTER_REGNUM         19
 #define MB_ABI_PIC_ADDR_REGNUM              20
@@ -157,7 +155,7 @@ extern enum pipeline_type microblaze_pipe;
 #define MB_ABI_STATIC_CHAIN_REGNUM           3
 #define MB_ABI_TEMP1_REGNUM                 11
 #define MB_ABI_TEMP2_REGNUM                 12
-#define MB_ABI_MSR_SAVE_REG                 11	
+#define MB_ABI_MSR_SAVE_REG                 11
 /* Volatile register used to save MSR in interrupt handlers.  */
 
 
@@ -177,8 +175,8 @@ extern enum pipeline_type microblaze_pipe;
 	(GP_REG_FIRST + MB_ABI_SUB_RETURN_ADDR_REGNUM)
 
 /* Initial state of return address on entry to func = R15.
-   Actually, the RA is at R15+8, but gcc doesn't know how 
-   to generate this. 
+   Actually, the RA is at R15+8, but gcc doesn't know how
+   to generate this.
    NOTE:  GDB has a workaround and expects this incorrect value.
    If this is fixed, a corresponding fix to GDB is needed.  */
 #define INCOMING_RETURN_ADDR_RTX  			\
@@ -199,10 +197,6 @@ extern enum pipeline_type microblaze_pipe;
    true if the symbol may be affected by dynamic relocations.  */
 #define ASM_PREFERRED_EH_DATA_FORMAT(CODE,GLOBAL) \
   ((flag_pic || GLOBAL) ? DW_EH_PE_aligned : DW_EH_PE_absptr)
-
-/* Use DWARF 2 debugging information by default.  */
-#define DWARF2_DEBUGGING_INFO
-#define PREFERRED_DEBUGGING_TYPE DWARF2_DEBUG
 
 /* Target machine storage layout */
 
@@ -297,7 +291,7 @@ extern enum pipeline_type microblaze_pipe;
    rMB_ABI_INTR_RETUREN_ADDR_REGNUM is a fixed
    register(return address for interrupt), and will not be used for
    anything else.  */
-   
+
 #define FRAME_POINTER_REGNUM 		FRP_REG_NUM
 #define HARD_FRAME_POINTER_REGNUM       \
         (GP_REG_FIRST + MB_ABI_FRAME_POINTER_REGNUM)
@@ -387,7 +381,7 @@ extern enum reg_class microblaze_regno_to_class[];
    && (((VALUE) & 0x0000ffff) != 0					\
        || (((VALUE) & ~2147483647) != 0					\
 	   && ((VALUE) & ~2147483647) != ~2147483647)))
-	
+
 #define PREFERRED_RELOAD_CLASS(X,CLASS)					\
   ((CLASS) != ALL_REGS							\
    ? (CLASS)							\
@@ -609,53 +603,6 @@ typedef struct microblaze_args
 
 #define PRINT_OPERAND_ADDRESS(FILE, ADDR) print_operand_address (FILE, ADDR)
 
-/* ASM_OUTPUT_ALIGNED_COMMON and ASM_OUTPUT_ALIGNED_LOCAL
-
-   Unfortunately, we still need to set the section explicitly. Somehow,
-   our binutils assign .comm and .lcomm variables to the "current" section 
-   in the assembly file, rather than where they implicitly belong. We need to
-   remove this explicit setting in GCC when binutils can understand sections
-   better.  */
-#undef	ASM_OUTPUT_ALIGNED_COMMON
-#define	ASM_OUTPUT_ALIGNED_COMMON(FILE, NAME, SIZE, ALIGN)		\
-do {									\
-  if ((SIZE) > 0 && (SIZE) <= INT_MAX					\
-      && (int) (SIZE) <= microblaze_section_threshold			\
-      && TARGET_XLGPOPT)						\
-    {                                                                   \
-      switch_to_section (sbss_section);					\
-    }									\
-  else									\
-    {									\
-      switch_to_section (bss_section);					\
-    }                                                                   \
-  fprintf (FILE, "%s", COMMON_ASM_OP);                                  \
-  assemble_name ((FILE), (NAME));					\
-  fprintf ((FILE), "," HOST_WIDE_INT_PRINT_UNSIGNED",%u\n",		\
-           (SIZE), (ALIGN) / BITS_PER_UNIT);                            \
-  ASM_OUTPUT_TYPE_DIRECTIVE (FILE, NAME, "object");			\
-} while (0)
-
-#undef ASM_OUTPUT_ALIGNED_LOCAL
-#define	ASM_OUTPUT_ALIGNED_LOCAL(FILE, NAME, SIZE, ALIGN)		\
-do {									\
-  if ((SIZE) > 0 && (SIZE) <= INT_MAX					\
-      && (int) (SIZE) <= microblaze_section_threshold			\
-      && TARGET_XLGPOPT)						\
-    {                                                                   \
-      switch_to_section (sbss_section);					\
-    }									\
-  else									\
-    {									\
-      switch_to_section (bss_section);					\
-    }                                                                   \
-  fprintf (FILE, "%s", LCOMMON_ASM_OP);                                 \
-  assemble_name ((FILE), (NAME));					\
-  fprintf ((FILE), "," HOST_WIDE_INT_PRINT_UNSIGNED",%u\n",		\
-           (SIZE), (ALIGN) / BITS_PER_UNIT);                            \
-  ASM_OUTPUT_TYPE_DIRECTIVE (FILE, NAME, "object");			\
-} while (0)
-
 #define	ASM_OUTPUT_ALIGNED_BSS(FILE, DECL, NAME, SIZE, ALIGN)		\
 do {									\
   ASM_OUTPUT_ALIGNED_LOCAL (FILE, NAME, SIZE, ALIGN);			\
@@ -670,9 +617,6 @@ do {									\
 
 #undef TARGET_ASM_DESTRUCTOR
 #define TARGET_ASM_DESTRUCTOR microblaze_elf_asm_destructor
-
-#define ASM_GENERATE_INTERNAL_LABEL(LABEL,PREFIX,NUM)			\
-  sprintf ((LABEL), "*%s%s%ld", (LOCAL_LABEL_PREFIX), (PREFIX), (long)(NUM))
 
 #define ASM_OUTPUT_ADDR_VEC_ELT(STREAM, VALUE)				\
   fprintf (STREAM, "\t%s\t%sL%d\n",					\
@@ -693,15 +637,6 @@ do {									\
 
 #define ASM_OUTPUT_ALIGN(STREAM,LOG)					\
   fprintf (STREAM, "\t.align\t%d\n", (LOG))
-
-#define ASM_OUTPUT_SKIP(STREAM,SIZE)					\
-  fprintf (STREAM, "\t.space\t" HOST_WIDE_INT_PRINT_UNSIGNED "\n", (SIZE))
-
-#define ASCII_DATA_ASM_OP		"\t.ascii\t"
-#define STRING_ASM_OP			"\t.asciz\t"
-
-#undef TARGET_ASM_OUTPUT_IDENT
-#define TARGET_ASM_OUTPUT_IDENT microblaze_asm_output_ident
 
 /* Default to -G 8 */
 #ifndef MICROBLAZE_DEFAULT_GVALUE
@@ -750,74 +685,8 @@ extern int save_volatiles;
 
 /* The following #defines are used in the headers files. Always retain these.  */
 
-/* Added for declaring size at the end of the function.  */
-#undef ASM_DECLARE_FUNCTION_SIZE
-#define ASM_DECLARE_FUNCTION_SIZE(FILE, FNAME, DECL)			\
-  do {									\
-    if (!flag_inhibit_size_directive)					\
-      {									\
-        char label[256];						\
-	static int labelno;						\
-	labelno++;							\
-	ASM_GENERATE_INTERNAL_LABEL (label, "Lfe", labelno);		\
-        (*targetm.asm_out.internal_label) (FILE, "Lfe", labelno);	\
-	fprintf (FILE, "%s", SIZE_ASM_OP);				\
-	assemble_name (FILE, (FNAME));					\
-        fprintf (FILE, ",");						\
-	assemble_name (FILE, label);					\
-        fprintf (FILE, "-");						\
-	assemble_name (FILE, (FNAME));					\
-	putc ('\n', FILE);						\
-      }									\
-  } while (0)
-
 #define GLOBAL_ASM_OP			"\t.globl\t"
-#define TYPE_ASM_OP			"\t.type\t"
-#define SIZE_ASM_OP			"\t.size\t"
-#define COMMON_ASM_OP			"\t.comm\t"
 #define LCOMMON_ASM_OP			"\t.lcomm\t"
-
-#define MAX_OFILE_ALIGNMENT		(32768*8)
-
-#define TYPE_OPERAND_FMT        	"@%s"
-
-/* Write the extra assembler code needed to declare an object properly.  */
-#undef ASM_DECLARE_OBJECT_NAME
-#define ASM_DECLARE_OBJECT_NAME(FILE, NAME, DECL)			\
-  do {									\
-    fprintf (FILE, "%s", TYPE_ASM_OP);			         	\
-    assemble_name (FILE, NAME);						\
-    putc (',', FILE);							\
-    fprintf (FILE, TYPE_OPERAND_FMT, "object");				\
-    putc ('\n', FILE);							\
-    size_directive_output = 0;						\
-    if (!flag_inhibit_size_directive && DECL_SIZE (DECL))		\
-      {									\
-	size_directive_output = 1;					\
-	fprintf (FILE, "%s", SIZE_ASM_OP);				\
-	assemble_name (FILE, NAME);					\
-	fprintf (FILE, "," HOST_WIDE_INT_PRINT_DEC "\n",		\
-	int_size_in_bytes (TREE_TYPE (DECL)));				\
-      }									\
-    microblaze_declare_object (FILE, NAME, "", ":\n", 0);			\
-  } while (0)
-
-#undef ASM_FINISH_DECLARE_OBJECT
-#define ASM_FINISH_DECLARE_OBJECT(FILE, DECL, TOP_LEVEL, AT_END)	 \
-do {									 \
-     const char *name = XSTR (XEXP (DECL_RTL (DECL), 0), 0);		 \
-     if (!flag_inhibit_size_directive && DECL_SIZE (DECL)		 \
-         && ! AT_END && TOP_LEVEL					 \
-	 && DECL_INITIAL (DECL) == error_mark_node			 \
-	 && !size_directive_output)					 \
-       {								 \
-	 size_directive_output = 1;					 \
-	 fprintf (FILE, "%s", SIZE_ASM_OP);			         \
-	 assemble_name (FILE, name);					 \
-	 fprintf (FILE, "," HOST_WIDE_INT_PRINT_DEC "\n",		 \
-		  int_size_in_bytes (TREE_TYPE (DECL)));		 \
-       }								 \
-   } while (0)
 
 #define ASM_OUTPUT_DEF(FILE,LABEL1,LABEL2)                            \
  do { fputc ( '\t', FILE);                                            \
@@ -827,35 +696,17 @@ do {									 \
       fputc ( '\n', FILE);                                            \
  } while (0)
 
-#define ASM_WEAKEN_LABEL(FILE,NAME) 					\
- do { fputs ("\t.weakext\t", FILE);					\
-      assemble_name (FILE, NAME);					\
-      fputc ('\n', FILE);						\
-    } while (0)
+/* Define the strings to put out for each section in the object file.
 
-#define MAKE_DECL_ONE_ONLY(DECL)	(DECL_WEAK (DECL) = 1)
-#undef UNIQUE_SECTION_P
-#define UNIQUE_SECTION_P(DECL)		(DECL_ONE_ONLY (DECL))
-
-#undef TARGET_ASM_NAMED_SECTION
-#define TARGET_ASM_NAMED_SECTION        default_elf_asm_named_section
-
-/* Define the strings to put out for each section in the object file.  
-   
-   Note: For ctors/dtors, we want to give these sections the SHF_WRITE 
-   attribute to allow shared libraries to patch/resolve addresses into 
-   these locations.  On Microblaze, there is no concept of shared libraries 
+   Note: For ctors/dtors, we want to give these sections the SHF_WRITE
+   attribute to allow shared libraries to patch/resolve addresses into
+   these locations.  On Microblaze, there is no concept of shared libraries
    yet, so this is for future use.  */
 #define TEXT_SECTION_ASM_OP	"\t.text"
 #define DATA_SECTION_ASM_OP	"\t.data"
-#define READONLY_DATA_SECTION_ASM_OP    \
-                                "\t.rodata"
 #define BSS_SECTION_ASM_OP      "\t.bss"
 #define CTORS_SECTION_ASM_OP    "\t.section\t.ctors,\"aw\""
 #define DTORS_SECTION_ASM_OP    "\t.section\t.dtors,\"aw\""
-#define INIT_SECTION_ASM_OP     "\t.section\t.init,\"ax\""
-#define FINI_SECTION_ASM_OP     "\t.section\t.fini,\"ax\""
-
 #define SDATA_SECTION_ASM_OP	"\t.sdata"	/* Small RW initialized data   */
 #define SDATA2_SECTION_ASM_OP	"\t.sdata2"	/* Small RO initialized data   */
 #define SBSS_SECTION_ASM_OP     "\t.sbss"	/* Small RW uninitialized data */
@@ -865,21 +716,17 @@ do {									 \
    by the call_FUNC () wrappers, used by the generic CRT_CALL_STATIC_FUNCTION
    definition in crtstuff.c.  */
 #define CRT_CALL_STATIC_FUNCTION(SECTION_OP, FUNC)	\
-    asm ( SECTION_OP "\n"                               \
-          "\tbrlid   r15, " #FUNC "\n\t nop\n"         \
+    asm ( SECTION_OP "\n"				\
+          "\tbrlid   r15, " #FUNC "\n\t nop\n"		\
           TEXT_SECTION_ASM_OP);
 
-/* We need to group -lm as well, since some Newlib math functions 
+/* We need to group -lm as well, since some Newlib math functions
    reference __errno!  */
 #undef LIB_SPEC
 #define LIB_SPEC \
 "%{!nostdlib: \
 %{pg:-start-group -lxilprofile -lgloss -lxil -lc -lm -end-group } \
 %{!pg:-start-group -lgloss -lxil -lc -lm -end-group }} "
-
-/* microblaze-unknown-elf target has no support of C99 runtime */
-#undef TARGET_LIBC_HAS_FUNCTION
-#define TARGET_LIBC_HAS_FUNCTION no_c99_libc_has_function
 
 #undef  ENDFILE_SPEC
 #define ENDFILE_SPEC "crtend.o%s crtn.o%s"
